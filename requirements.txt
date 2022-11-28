@@ -27,3 +27,6 @@ pillow
 scikit-learn 
 scipy 
 matplotlib
+
+pydot
+seaborn
