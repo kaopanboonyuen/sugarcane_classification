@@ -23,7 +23,7 @@ st.set_page_config(layout="wide", page_title="AI-Sugarcane Classification", page
 st.title('AI-APP: Sugarcane Classification Model')
 
 
-st.info('Assessment of machine learning on sugarcane classification ')
+st.info('Assessment of machine learning on sugarcane classification')
 #st.warning('Updated: December, 2022')
 
 from PIL import Image
@@ -349,6 +349,9 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 
 	#cm = confusion_matrix(y_test,rf.predict(X_test))
 
+	second_stage.warning('Performance Evaluation of Traning Model')
+
+
 	second_stage.text('Model Report:\n ' + classification_report(y_true, y_pred))
 
 	#second_stage.text('Confusion matrix: ', cm)
@@ -367,320 +370,342 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 	result = rf.score(X_test, y_test)
 	print(result)
 
-	# import time
-
-	# with st.spinner('Waiting for this process. This may take a while ...'):
-
-	# 	time.sleep(10)
-
-
-
-	# 	import time
-	# 	start_time = time.time()
-
-	# 	# Predicting the rest of the image
-
-	# 	# Take our full image and reshape into long 2d array (nrow * ncol, nband) for classification
-	# 	new_shape = (img.shape[0] * img.shape[1], img.shape[2])
-	# 	img_as_array = img[:, :, :np.int(img.shape[2])].reshape(new_shape)
-	# 	#img_as_array = img[:, :, :int(img.shape[2])].reshape(new_shape)
-
-	# 	print('Reshaped from {o} to {n}'.format(o=img.shape, n=img_as_array.shape))
-
-	# 	img_as_array = np.nan_to_num(img_as_array)
-
-	# 	# Now predict for each pixel
-	# 	# first prediction will be tried on the entire image
-	# 	# if not enough RAM, the dataset will be sliced
-	# 	try:
-	# 	    class_prediction = rf.predict(img_as_array)
-	# 	except MemoryError:
-	# 	    #slices = int(round(len(img_as_array)/2))
-	# 	    slices = int(round(len(img_as_array)/200))
-
-	# 	    test = True
-		    
-	# 	    while test == True:
-	# 	        try:
-	# 	            class_preds = list()
-		            
-	# 	            temp = rf.predict(img_as_array[0:slices+1,:])
-	# 	            class_preds.append(temp)
-		            
-	# 	            for i in range(slices,len(img_as_array),slices):
-	# 	                print('{} %, derzeit: {}'.format((i*100)/(len(img_as_array)), i))
-	# 	                temp = rf.predict(img_as_array[i+1:i+(slices+1),:])                
-	# 	                class_preds.append(temp)
-		            
-	# 	        except MemoryError as error:
-	# 	            #slices = slices/2
-	# 	            slices = slices/2
-	# 	            print('Not enought RAM, new slices = {}'.format(slices))
-		            
-	# 	        else:
-	# 	            test = False
-	# 	else:
-	# 	    print('Class prediction was successful without slicing!')
-		    
-	# 	# concatenate all slices and re-shape it to the original extend
-	# 	try:
-	# 	    class_prediction = np.concatenate(class_preds,axis = 0)
-	# 	except NameError:
-	# 	    print('No slicing was necessary!')
-		    
-	# 	class_prediction = class_prediction.reshape(img[:, :, 0].shape)
-	# 	print('Reshaped back to {}'.format(class_prediction.shape))
-
-	# 	# generate mask image from red band
-	# 	mask = np.copy(img[:,:,0])
-	# 	mask[mask > 0.0] = 1.0 # all actual pixels have a value of 1.0
-
-	# 	# plot mask
-
-	# 	plt.imshow(mask)
-
-	# 	# mask classification an plot
-
-	# 	class_prediction.astype(np.float16)
-	# 	class_prediction_ = class_prediction*mask
-
-	# 	plt.subplot(121)
-	# 	plt.imshow(class_prediction, cmap=plt.cm.Spectral)
-	# 	plt.title('classification unmasked')
-
-	# 	plt.subplot(122)
-	# 	plt.imshow(class_prediction_, cmap=plt.cm.Spectral)
-	# 	plt.title('classification masked')
-
-	# 	plt.show()
-
-	# 	cols = img.shape[1]
-	# 	rows = img.shape[0]
-
-	# 	class_prediction_.astype(np.float16)
-
-	# 	driver = gdal.GetDriverByName("gtiff")
-	# 	outdata = driver.Create(classification_image, cols, rows, 1, gdal.GDT_UInt16)
-	# 	outdata.SetGeoTransform(img_ds.GetGeoTransform())##sets same geotransform as input
-	# 	outdata.SetProjection(img_ds.GetProjection())##sets same projection as input
-	# 	outdata.GetRasterBand(1).WriteArray(class_prediction_)
-	# 	outdata.FlushCache() ##saves to disk!!
-	# 	print('Image saved to: {}'.format(classification_image))
-
-	# 	# validation / accuracy assessment
-
-	# 	# preparing ttxt file
-
-	# 	print('------------------------------------', file=open(results_txt, "a"))
-	# 	print('VALIDATION', file=open(results_txt, "a"))
-
-	# 	# laod training data from shape file
-	# 	shape_dataset_v = ogr.Open(validation)
-	# 	shape_layer_v = shape_dataset_v.GetLayer()
-	# 	mem_drv_v = gdal.GetDriverByName('MEM')
-	# 	mem_raster_v = mem_drv_v.Create('',img_ds.RasterXSize,img_ds.RasterYSize,1,gdal.GDT_UInt16)
-	# 	mem_raster_v.SetProjection(img_ds.GetProjection())
-	# 	mem_raster_v.SetGeoTransform(img_ds.GetGeoTransform())
-	# 	mem_band_v = mem_raster_v.GetRasterBand(1)
-	# 	mem_band_v.Fill(0)
-	# 	mem_band_v.SetNoDataValue(0)
-
-	# 	# http://gdal.org/gdal__alg_8h.html#adfe5e5d287d6c184aab03acbfa567cb1
-	# 	# http://gis.stackexchange.com/questions/31568/gdal-rasterizelayer-doesnt-burn-all-polygons-to-raster
-	# 	err_v = gdal.RasterizeLayer(mem_raster_v, [1], shape_layer_v, None, None, [1],  [att_,"ALL_TOUCHED=TRUE"])
-	# 	assert err_v == gdal.CE_None
-
-	# 	roi_v = mem_raster_v.ReadAsArray()
-
-
-
-	# 	# vizualise
-	# 	plt.subplot(221)
-	# 	plt.imshow(img[:, :, 0], cmap=plt.cm.Greys_r)
-	# 	plt.title('RS_Image - first band')
-
-	# 	plt.subplot(222)
-	# 	plt.imshow(class_prediction, cmap=plt.cm.Spectral)
-	# 	plt.title('Classification result')
-
-
-	# 	plt.subplot(223)
-	# 	plt.imshow(roi, cmap=plt.cm.Spectral)
-	# 	plt.title('Training Data')
-
-	# 	plt.subplot(224)
-	# 	plt.imshow(roi_v, cmap=plt.cm.Spectral)
-	# 	plt.title('Validation Data')
-
-	# 	plt.show()
-
-
-	# 	# Find how many non-zero entries we have -- i.e. how many validation data samples?
-	# 	n_val = (roi_v > 0).sum()
-	# 	print('{n} validation pixels'.format(n=n_val))
-	# 	print('{n} validation pixels'.format(n=n_val), file=open(results_txt, "a"))
-
-	# 	# What are our validation labels?
-	# 	labels_v = np.unique(roi_v[roi_v > 0])
-	# 	print('validation data include {n} classes: {classes}'.format(n=labels_v.size, classes=labels_v))
-	# 	print('validation data include {n} classes: {classes}'.format(n=labels_v.size, classes=labels_v), file=open(results_txt, "a"))
-	# 	# Subset the classification image with the validation image = X
-	# 	# Mask the classes on the validation dataset = y
-	# 	# These will have n_samples rows
-	# 	X_v = class_prediction[roi_v > 0]
-	# 	y_v = roi_v[roi_v > 0]
-
-	# 	print('Our X matrix is sized: {sz_v}'.format(sz_v=X_v.shape))
-	# 	print('Our y array is sized: {sz_v}'.format(sz_v=y_v.shape))
-
-	# 	# Cross-tabulate predictions
-	# 	# confusion matrix
-	# 	convolution_mat = pd.crosstab(y_v, X_v, margins=True)
-	# 	print(convolution_mat)
-	# 	print(convolution_mat, file=open(results_txt, "a"))
-	# 	# if you want to save the confusion matrix as a CSV file:
-	# 	#savename = 'C:\\save\\to\\folder\\conf_matrix_' + str(est) + '.csv'
-	# 	#convolution_mat.to_csv(savename, sep=';', decimal = '.')
-
-	# 	# information about precision, recall, f1_score, and support:
-	# 	# http://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html
-	# 	#sklearn.metrics.precision_recall_fscore_support
-	# 	target_names = list()
-	# 	for name in range(1,(labels.size)+1):
-	# 	    target_names.append(str(name))
-	# 	sum_mat = classification_report(y_v,X_v,target_names=target_names)
-	# 	print(sum_mat)
-	# 	print(sum_mat, file=open(results_txt, "a"))
-
-	# 	# Overall Accuracy (OAA)
-	# 	print('OAA = {} %'.format(accuracy_score(y_v,X_v)*100))
-	# 	print('OAA = {} %'.format(accuracy_score(y_v,X_v)*100), file=open(results_txt, "a"))
-
-	# 	# Plot
-	# 	x_axis_labels = ['Paddy01','Paddy02', 'Paddy03', 'Sugarcane', 'Buildup', 'Palm', 'Eucalyptus', 'Casava', 'Water01', 'Water02', 'Water03']
-	# 	y_axis_labels =  ['Paddy01','Paddy02', 'Paddy03', 'Sugarcane', 'Buildup', 'Palm', 'Eucalyptus', 'Casava', 'Water01', 'Water02', 'Water03']
-
-
-	# 	fig = plt.figure(figsize=(10,7))
-
-	# 	cm = confusion_matrix(y_test,rf.predict(X_test)) #, normalize='all')
-	# 	#cm = cm.astype('float')/cm.sum(axis=0)[:,np.newaxis]
-	# 	#sn.heatmap(cm, annot=True, fmt='g')
-	# 	sn.heatmap(cm, annot=True, fmt='g',  xticklabels=x_axis_labels, yticklabels=y_axis_labels, cmap='YlGnBu') #, vmin=0, vmax=1)
-	# 	plt.title('Classification confusion matrix')
-	# 	plt.xlabel('classes - predicted')
-	# 	plt.ylabel('classes - truth')
-	# 	plt.xticks(rotation=45)
-	# 	plt.show()
-
-	# 	# Open raw classification result
-	# 	img_ds = gdal.Open(classification_image, 1)  # open image in read-write mode
-	# 	gt = img_ds.GetGeoTransform()
-	# 	proj = img_ds.GetProjection()
-	# 	Band = img_ds.GetRasterBand(1)
-
-	# 	# print(gdal.Info(img_ds))
-	# 	# yRasSize = img_ds.RasterYSize
-	# 	# xRasSize = img_ds.RasterXSize
-	# 	# print(yRasSize, xRasSize)
-
-	# 	# copy file to other dir and process generalization
-	# 	fn_new = r"ml_result/rf_class.tif"
-	# 	driver_tiff = gdal.GetDriverByName("GTiff")
-	# 	# copy original raster
-	# 	ds_copy = driver_tiff.CreateCopy(fn_new, img_ds, strict=0)
-	# 	ds_copy = None
-	# 	print("Copy raster done!")
-
-	# 	# Generalization
-	# 	ds_class = gdal.Open(r"ml_result/rf_class.tif", 1)
-	# 	Band = ds_class.GetRasterBand(1)
-	# 	gdal.SieveFilter(srcBand=Band, maskBand=None, dstBand=Band, threshold=1, connectedness=1, callback=gdal.TermProgress_nocb)
-	# 	ds_class = None
-	# 	Band = None
-	# 	print("Generalization done!")
-
-	# 	# mask only sugarcane
-	# 	ds_gen = gdal.Open(r"ml_result/rf_class.tif", 1)
-	# 	ds_mask = r"ml_result/rfgen_cane.tif"
-	# 	gt = ds_gen.GetGeoTransform()
-	# 	proj = ds_gen.GetProjection()
-
-	# 	Band = ds_gen.GetRasterBand(1)
-	# 	array = Band.ReadAsArray()
-	# 	plt.subplot(121)
-	# 	# plt.figure()
-	# 	plt.imshow(array)
-	# 	plt.title("All classes")
-
-	# 	# Making mask using sugarcane class = 1
-	# 	sel = 4
-	# 	binmask = np.where((array == sel),1,0)
-	# 	# plt.figure()
-	# 	# plt.imshow(binmask)
-
-	# 	# Masking generalized classification using binmask
-	# 	driver = gdal.GetDriverByName("GTiff")
-	# 	driver.Register()
-	# 	outds = driver.Create(ds_mask, xsize = binmask.shape[1],
-	# 	                      ysize = binmask.shape[0], bands = 1, 
-	# 	                      eType = gdal.GDT_Int16)
-	# 	outds.SetGeoTransform(gt)
-	# 	outds.SetProjection(proj)
-	# 	outband = outds.GetRasterBand(1)
-	# 	outband.WriteArray(binmask)
-	# 	outband.SetNoDataValue(np.nan)
-	# 	outband.FlushCache()
-
-	# 	# close your datasets and bands!!!
-	# 	outband = None
-	# 	outds = None
-
-	# 	# display mask result
-	# 	caneImg = gdal.Open(r"ml_result/rfgen_cane.tif")
-	# 	Band = caneImg.GetRasterBand(1)
-	# 	array = Band.ReadAsArray()
-	# 	#plt.figure()
-	# 	plt.subplot(122)
-	# 	plt.imshow(array)
-	# 	plt.title("Mask sugarcane")
-
-
-	# 	shp_ds = r"ml_result/rf_sugarcane.shp"
-	# 	src_ds = gdal.Open(r"ml_result/rfgen_cane.tif",1)
-	# 	srcband = src_ds.GetRasterBand(1)
-	# 	dst_layerName = "sugarcane"
-	# 	drv = ogr.GetDriverByName("ESRI Shapefile")
-
-	# 	if os.path.exists(shp_ds):
-	# 	    drv.DeleteDataSource(shp_ds)
-
-	# 	dst_ds = drv.CreateDataSource(shp_ds)
-
-	# 	sp_ref = osr.SpatialReference()
-	# 	sp_ref.SetFromUserInput("EPSG:32648")
-
-	# 	dst_layer = dst_ds.CreateLayer(dst_layerName, srs=sp_ref)
-
-	# 	fld = ogr.FieldDefn("VALUE", ogr.OFTInteger)
-	# 	dst_layer.CreateField(fld)
-	# 	dst_field = dst_layer.GetLayerDefn().GetFieldIndex("VALUE")
-
-	# 	gdal.Polygonize(srcband, None, dst_layer, 0, [], callback=None)
-	# 	dst_ds.Destroy()
-	# 	print('Done!')
-
-	# 	print()
-	# 	print(f'Final Time Execution --- %s Seconds ---' % (time.time() - start_time))
-	# 	print()
-	# 	import datetime
-	# 	SecToConvert =  time.time() - start_time #56000
-	# 	ConvertedSec = str(datetime.timedelta(seconds = SecToConvert))
-	# 	print("Converted Results are: ", ConvertedSec)
-	# 	print()
-			
-
-
+	third_stage.warning('Waiting for this process. This may take a while ...')
+
+
+	########################################
+	# ------------------------------------ #
+	# ------------------------------------ #
+	########################################
+
+
+	########################################
+	# ------------------------------------ #
+	# ------------------------------------ #
+	########################################
+
+
+	import time
+	start_time = time.time()
+
+	# Predicting the rest of the image
+
+	# Take our full image and reshape into long 2d array (nrow * ncol, nband) for classification
+	new_shape = (img.shape[0] * img.shape[1], img.shape[2])
+	img_as_array = img[:, :, :np.int(img.shape[2])].reshape(new_shape)
+	#img_as_array = img[:, :, :int(img.shape[2])].reshape(new_shape)
+
+	print('Reshaped from {o} to {n}'.format(o=img.shape, n=img_as_array.shape))
+
+	img_as_array = np.nan_to_num(img_as_array)
+
+	# Now predict for each pixel
+	# first prediction will be tried on the entire image
+	# if not enough RAM, the dataset will be sliced
+	try:
+	    class_prediction = rf.predict(img_as_array)
+	except MemoryError:
+	    #slices = int(round(len(img_as_array)/2))
+	    slices = int(round(len(img_as_array)/200))
+
+	    test = True
+	    
+	    while test == True:
+	        try:
+	            class_preds = list()
+	            
+	            temp = rf.predict(img_as_array[0:slices+1,:])
+	            class_preds.append(temp)
+	            
+	            for i in range(slices,len(img_as_array),slices):
+	                print('{} %, derzeit: {}'.format((i*100)/(len(img_as_array)), i))
+	                temp = rf.predict(img_as_array[i+1:i+(slices+1),:])                
+	                class_preds.append(temp)
+	            
+	        except MemoryError as error:
+	            #slices = slices/2
+	            slices = slices/2
+	            print('Not enought RAM, new slices = {}'.format(slices))
+	            
+	        else:
+	            test = False
+	else:
+	    print('Class prediction was successful without slicing!')
+	    
+	# concatenate all slices and re-shape it to the original extend
+	try:
+	    class_prediction = np.concatenate(class_preds,axis = 0)
+	except NameError:
+	    print('No slicing was necessary!')
+	    
+	class_prediction = class_prediction.reshape(img[:, :, 0].shape)
+	print('Reshaped back to {}'.format(class_prediction.shape))
+
+	# generate mask image from red band
+	mask = np.copy(img[:,:,0])
+	mask[mask > 0.0] = 1.0 # all actual pixels have a value of 1.0
+
+	# plot mask
+
+	plt.imshow(mask)
+
+	# mask classification an plot
+
+	class_prediction.astype(np.float16)
+	class_prediction_ = class_prediction*mask
+
+	plt.subplot(121)
+	plt.imshow(class_prediction, cmap=plt.cm.Spectral)
+	plt.title('classification unmasked')
+
+	plt.subplot(122)
+	plt.imshow(class_prediction_, cmap=plt.cm.Spectral)
+	plt.title('classification masked')
+
+	plt.show()
+
+	cols = img.shape[1]
+	rows = img.shape[0]
+
+	class_prediction_.astype(np.float16)
+
+	driver = gdal.GetDriverByName("gtiff")
+	outdata = driver.Create(classification_image, cols, rows, 1, gdal.GDT_UInt16)
+	outdata.SetGeoTransform(img_ds.GetGeoTransform())##sets same geotransform as input
+	outdata.SetProjection(img_ds.GetProjection())##sets same projection as input
+	outdata.GetRasterBand(1).WriteArray(class_prediction_)
+	outdata.FlushCache() ##saves to disk!!
+	print('Image saved to: {}'.format(classification_image))
+
+	# validation / accuracy assessment
+
+	# preparing ttxt file
+
+	print('------------------------------------', file=open(results_txt, "a"))
+	print('VALIDATION', file=open(results_txt, "a"))
+
+	# laod training data from shape file
+	shape_dataset_v = ogr.Open(validation)
+	shape_layer_v = shape_dataset_v.GetLayer()
+	mem_drv_v = gdal.GetDriverByName('MEM')
+	mem_raster_v = mem_drv_v.Create('',img_ds.RasterXSize,img_ds.RasterYSize,1,gdal.GDT_UInt16)
+	mem_raster_v.SetProjection(img_ds.GetProjection())
+	mem_raster_v.SetGeoTransform(img_ds.GetGeoTransform())
+	mem_band_v = mem_raster_v.GetRasterBand(1)
+	mem_band_v.Fill(0)
+	mem_band_v.SetNoDataValue(0)
+
+	# http://gdal.org/gdal__alg_8h.html#adfe5e5d287d6c184aab03acbfa567cb1
+	# http://gis.stackexchange.com/questions/31568/gdal-rasterizelayer-doesnt-burn-all-polygons-to-raster
+	err_v = gdal.RasterizeLayer(mem_raster_v, [1], shape_layer_v, None, None, [1],  [att_,"ALL_TOUCHED=TRUE"])
+	assert err_v == gdal.CE_None
+
+	roi_v = mem_raster_v.ReadAsArray()
+
+
+
+	# vizualise
+	plt.subplot(221)
+	plt.imshow(img[:, :, 0], cmap=plt.cm.Greys_r)
+	plt.title('RS_Image - first band')
+
+	plt.subplot(222)
+	plt.imshow(class_prediction, cmap=plt.cm.Spectral)
+	plt.title('Classification result')
+
+
+	plt.subplot(223)
+	plt.imshow(roi, cmap=plt.cm.Spectral)
+	plt.title('Training Data')
+
+	plt.subplot(224)
+	plt.imshow(roi_v, cmap=plt.cm.Spectral)
+	plt.title('Validation Data')
+
+	plt.show()
+
+
+	# Find how many non-zero entries we have -- i.e. how many validation data samples?
+	n_val = (roi_v > 0).sum()
+	print('{n} validation pixels'.format(n=n_val))
+	print('{n} validation pixels'.format(n=n_val), file=open(results_txt, "a"))
+
+	# What are our validation labels?
+	labels_v = np.unique(roi_v[roi_v > 0])
+	print('validation data include {n} classes: {classes}'.format(n=labels_v.size, classes=labels_v))
+	print('validation data include {n} classes: {classes}'.format(n=labels_v.size, classes=labels_v), file=open(results_txt, "a"))
+	# Subset the classification image with the validation image = X
+	# Mask the classes on the validation dataset = y
+	# These will have n_samples rows
+	X_v = class_prediction[roi_v > 0]
+	y_v = roi_v[roi_v > 0]
+
+	print('Our X matrix is sized: {sz_v}'.format(sz_v=X_v.shape))
+	print('Our y array is sized: {sz_v}'.format(sz_v=y_v.shape))
+
+	# Cross-tabulate predictions
+	# confusion matrix
+	convolution_mat = pd.crosstab(y_v, X_v, margins=True)
+	print(convolution_mat)
+	print(convolution_mat, file=open(results_txt, "a"))
+	# if you want to save the confusion matrix as a CSV file:
+	#savename = 'C:\\save\\to\\folder\\conf_matrix_' + str(est) + '.csv'
+	#convolution_mat.to_csv(savename, sep=';', decimal = '.')
+
+	# information about precision, recall, f1_score, and support:
+	# http://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html
+	#sklearn.metrics.precision_recall_fscore_support
+	target_names = list()
+	for name in range(1,(labels.size)+1):
+	    target_names.append(str(name))
+	sum_mat = classification_report(y_v,X_v,target_names=target_names)
+	print(sum_mat)
+	print(sum_mat, file=open(results_txt, "a"))
+
+	# Overall Accuracy (OAA)
+	print('OAA = {} %'.format(accuracy_score(y_v,X_v)*100))
+	print('OAA = {} %'.format(accuracy_score(y_v,X_v)*100), file=open(results_txt, "a"))
+
+	# Plot
+	x_axis_labels = ['Paddy01','Paddy02', 'Paddy03', 'Sugarcane', 'Buildup', 'Palm', 'Eucalyptus', 'Casava', 'Water01', 'Water02', 'Water03']
+	y_axis_labels =  ['Paddy01','Paddy02', 'Paddy03', 'Sugarcane', 'Buildup', 'Palm', 'Eucalyptus', 'Casava', 'Water01', 'Water02', 'Water03']
+
+
+	fig = plt.figure(figsize=(10,7))
+
+	cm = confusion_matrix(y_test,rf.predict(X_test)) #, normalize='all')
+	#cm = cm.astype('float')/cm.sum(axis=0)[:,np.newaxis]
+	#sn.heatmap(cm, annot=True, fmt='g')
+	sn.heatmap(cm, annot=True, fmt='g',  xticklabels=x_axis_labels, yticklabels=y_axis_labels, cmap='YlGnBu') #, vmin=0, vmax=1)
+	plt.title('Classification confusion matrix')
+	plt.xlabel('classes - predicted')
+	plt.ylabel('classes - truth')
+	plt.xticks(rotation=45)
+	plt.show()
+
+	# Open raw classification result
+	img_ds = gdal.Open(classification_image, 1)  # open image in read-write mode
+	gt = img_ds.GetGeoTransform()
+	proj = img_ds.GetProjection()
+	Band = img_ds.GetRasterBand(1)
+
+	# print(gdal.Info(img_ds))
+	# yRasSize = img_ds.RasterYSize
+	# xRasSize = img_ds.RasterXSize
+	# print(yRasSize, xRasSize)
+
+	# copy file to other dir and process generalization
+	fn_new = r"ml_result/rf_class.tif"
+	driver_tiff = gdal.GetDriverByName("GTiff")
+	# copy original raster
+	ds_copy = driver_tiff.CreateCopy(fn_new, img_ds, strict=0)
+	ds_copy = None
+	print("Copy raster done!")
+
+	# Generalization
+	ds_class = gdal.Open(r"ml_result/rf_class.tif", 1)
+	Band = ds_class.GetRasterBand(1)
+	gdal.SieveFilter(srcBand=Band, maskBand=None, dstBand=Band, threshold=1, connectedness=1, callback=gdal.TermProgress_nocb)
+	ds_class = None
+	Band = None
+	print("Generalization done!")
+
+	# mask only sugarcane
+	ds_gen = gdal.Open(r"ml_result/rf_class.tif", 1)
+	ds_mask = r"ml_result/rfgen_cane.tif"
+	gt = ds_gen.GetGeoTransform()
+	proj = ds_gen.GetProjection()
+
+	Band = ds_gen.GetRasterBand(1)
+	array = Band.ReadAsArray()
+	plt.subplot(121)
+	# plt.figure()
+	plt.imshow(array)
+	plt.title("All classes")
+
+	# Making mask using sugarcane class = 1
+	sel = 4
+	binmask = np.where((array == sel),1,0)
+	# plt.figure()
+	# plt.imshow(binmask)
+
+	# Masking generalized classification using binmask
+	driver = gdal.GetDriverByName("GTiff")
+	driver.Register()
+	outds = driver.Create(ds_mask, xsize = binmask.shape[1],
+	                      ysize = binmask.shape[0], bands = 1, 
+	                      eType = gdal.GDT_Int16)
+	outds.SetGeoTransform(gt)
+	outds.SetProjection(proj)
+	outband = outds.GetRasterBand(1)
+	outband.WriteArray(binmask)
+	outband.SetNoDataValue(np.nan)
+	outband.FlushCache()
+
+	# close your datasets and bands!!!
+	outband = None
+	outds = None
+
+	# display mask result
+	caneImg = gdal.Open(r"ml_result/rfgen_cane.tif")
+	Band = caneImg.GetRasterBand(1)
+	array = Band.ReadAsArray()
+	#plt.figure()
+	plt.subplot(122)
+	plt.imshow(array)
+	plt.title("Mask sugarcane")
+
+
+	shp_ds = r"ml_result/rf_sugarcane.shp"
+	src_ds = gdal.Open(r"ml_result/rfgen_cane.tif",1)
+	srcband = src_ds.GetRasterBand(1)
+	dst_layerName = "sugarcane"
+	drv = ogr.GetDriverByName("ESRI Shapefile")
+
+	if os.path.exists(shp_ds):
+	    drv.DeleteDataSource(shp_ds)
+
+	dst_ds = drv.CreateDataSource(shp_ds)
+
+	sp_ref = osr.SpatialReference()
+	sp_ref.SetFromUserInput("EPSG:32648")
+
+	dst_layer = dst_ds.CreateLayer(dst_layerName, srs=sp_ref)
+
+	fld = ogr.FieldDefn("VALUE", ogr.OFTInteger)
+	dst_layer.CreateField(fld)
+	dst_field = dst_layer.GetLayerDefn().GetFieldIndex("VALUE")
+
+	gdal.Polygonize(srcband, None, dst_layer, 0, [], callback=None)
+	dst_ds.Destroy()
+	print('Done!')
+
+	print()
+	print(f'Final Time Execution --- %s Seconds ---' % (time.time() - start_time))
+	print()
+	import datetime
+	SecToConvert =  time.time() - start_time #56000
+	ConvertedSec = str(datetime.timedelta(seconds = SecToConvert))
+	print("Converted Results are: ", ConvertedSec)
+	print()
+
+
+
+	########################################
+	# ------------------------------------ #
+	# ------------------------------------ #
+	########################################
+
+	########################################
+	# ------------------------------------ #
+	# ------------------------------------ #
+	########################################
+
+
+
+
+	third_stage.info('Already done ...')
+		
 
 	with zipfile.ZipFile('shape_file_results.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
 		zipdir('ml_result/', zipf)
