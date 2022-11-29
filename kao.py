@@ -22,6 +22,20 @@ import seaborn as sn
 import pickle
 import datetime
 
+
+from sklearn.model_selection import ShuffleSplit, GridSearchCV, cross_val_score
+from sklearn.linear_model import LinearRegression
+from sklearn.neural_network import MLPRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+import matplotlib.pyplot as plt
+from scipy import stats
+import seaborn as sns
+
 import warnings
 warnings.filterwarnings("ignore")
 
