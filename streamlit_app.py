@@ -20,7 +20,7 @@ Path("val_label_data").mkdir(parents=True, exist_ok=True)
 st.set_page_config(layout="wide", page_title="AI-Sugarcane Classification", page_icon=":boy:")
 
 
-st.title('AI-APP: Sugarcane Classification Model')
+st.title('AI-APP: Sugarcane Classification and Regression Model')
 
 
 st.info('Assessment of machine learning on sugarcane classification')
@@ -29,7 +29,7 @@ st.info('Assessment of machine learning on sugarcane classification')
 from PIL import Image
 image = Image.open('logo6.png')
 
-st.image(image)
+st.image(image, use_column_width=True)
 
 
 first_stage, second_stage, third_stage = st.columns(3)
@@ -46,6 +46,8 @@ sat_image = first_stage.file_uploader('Upload Sattellite Image',type=["tif","tif
 train_label_image_multiple = first_stage.file_uploader('Upload Shape File Labeling (For Training Model)', type=['shp','shx','xml','lock','sbx','sbn','prj','dbf','cpg'],accept_multiple_files=True)
 val_label_image_multiple = first_stage.file_uploader('Upload Shape File Labeling (For Validation Model)',type=['shp','shx','xml','lock','sbx','sbn','prj','dbf','cpg'],accept_multiple_files=True)
 
+
+#st.warning('Updated: December 2022')
 
 
 # the remote sensing image you want to classify
@@ -327,6 +329,10 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 	y_pred = rf.predict(X_test)
 	print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
 
+
+
+
+
 	# Best paramete set
 	#print('Best parameters found:\n', rf.best_params_)
 
@@ -347,12 +353,17 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 
 	#second_stage.markdown(classification_report(y_true, y_pred))
 
-	#cm = confusion_matrix(y_test,rf.predict(X_test))
+	cm = confusion_matrix(y_test,rf.predict(X_test))
 
 	second_stage.warning('Performance Evaluation of Traning Model')
 
 
 	second_stage.text('Model Report:\n ' + classification_report(y_true, y_pred))
+
+
+	fig, ax = plt.subplots()
+	sns.heatmap(cm, annot=True, cmap='Oranges', fmt='g', cbar=False)
+	second_stage.write(fig)
 
 	#second_stage.text('Confusion matrix: ', cm)
 	# plt.figure(figsize=(10,7))
@@ -368,7 +379,86 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 	# inference load the model from disk
 	rf = pickle.load(open(filename, 'rb'))
 	result = rf.score(X_test, y_test)
+
 	print(result)
+
+	text_acc = 'Accuracy: '+str(metrics.accuracy_score(y_test, y_pred))
+	text_pr = 'Precision: '+str(metrics.precision_score(y_test, y_pred,average='weighted'))
+	text_re = 'Recall: '+str(metrics.recall_score(y_test, y_pred,average='weighted'))
+	text_f1 = 'F1 Score: '+str(metrics.f1_score(y_test, y_pred,average='weighted'))
+
+	second_stage.info(text_acc)
+	second_stage.info(text_pr)
+	second_stage.info(text_re)
+	second_stage.info(text_f1)
+
+
+
+	second_stage.warning('Regression Model Report')
+
+	dat = r'regression/yield_data_edit.csv'
+	df_reg = pd.read_csv(dat, header=0)
+	df_reg.describe()
+
+	second_stage.dataframe(df_reg.describe()) 
+
+	df_reg = df_reg[(df_reg.tons_area<14.5) & (df_reg.tons_area>0) 
+	& (df_reg.band1_ndvi>=0.7) & (df_reg.band2_gndvi<0.82) & (df_reg.band2_gndvi>0.65)
+	 & (df_reg.band3_evi>0.4) & (df_reg.band4_savi>0.45) & (df_reg.band4_savi<0.72)]
+
+
+	dfCor2 = df_reg.iloc[:,1:6]
+	dfCor2.head()
+
+	sns.pairplot(dfCor2)
+
+	fig, ax = plt.subplots()
+	sns.heatmap(dfCor2.corr(), ax=ax)
+	second_stage.write(fig)
+
+	# Variable definition
+	ndvi = df_reg["band1_ndvi"].values
+	gndvi = df_reg["band2_gndvi"].values
+	evi = df_reg["band3_evi"].values
+	savi = df_reg["band4_savi"].values
+	FID = df_reg["FID_"].values
+
+	X2 = np.array([ndvi, gndvi, evi, savi]).reshape(-1, 4)
+	# X = np.array([ndvi, gndvi, savi]).reshape(-1, 3)
+	y2 = df_reg["tons_area"].values
+
+	X_train2, X_test2, y_train2, y_test2 = train_test_split(X2, y2, test_size=0.3, random_state=101)
+
+	# Set cross validation
+	cv = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
+
+	reg2 = LinearRegression().fit(X_train2, y_train2)
+	#print('Regression cross validation score: ', np.mean(cross_val_score(reg, X_train, y_train, cv=cv)))
+	#print('Regression score: ', reg.score(X_train, y_train))
+	print('Regression coefficient: ', reg2.coef_)
+	print('Intercept: ', reg2.intercept_)
+
+	#print("Accuracy: ", metrics.accuracy_score(y_test, y_pred))
+	y_pred2 = reg2.predict(X_test2)
+	#prediction = np.concatenate((y_test.reshape(743,1), y_pred.reshape(743,1)), axis=1)
+	print('r-squared: ', metrics.r2_score(y_test2, y_pred2))
+	print('RMS Error:', np.sqrt(metrics.mean_squared_error(y_test2, y_pred2)))
+	print('Mean Absolute Error:', metrics.mean_absolute_error(y_test2, y_pred2))
+	print('Mean Squared Error:', metrics.mean_squared_error(y_test2, y_pred2))
+
+	text_rsq = 'R-Squared: '+str(metrics.r2_score(y_test2, y_pred2))
+	text_rms = 'RMS Error: '+str(np.sqrt(metrics.mean_squared_error(y_test2, y_pred2)))
+	text_mae = 'Mean Absolute Error: '+str(metrics.mean_absolute_error(y_test2, y_pred2))
+	text_mse = 'Mean Squared Error: '+str(metrics.mean_squared_error(y_test2, y_pred2))
+
+	second_stage.info(text_rsq)
+	second_stage.info(text_rms)
+	second_stage.info(text_mae)
+	second_stage.info(text_mse)
+
+
+
+
 
 	third_stage.warning('Waiting for this process. This may take a while ...')
 
@@ -707,8 +797,11 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 	third_stage.info('Already done ...')
 		
 
-	with zipfile.ZipFile('shape_file_results.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
+	with zipfile.ZipFile('shape_file_cls_results.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
 		zipdir('ml_result/', zipf)
+
+	with zipfile.ZipFile('shape_file_reg_results.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
+		zipdir('regression/shp/', zipf)
 
 
 	# with open('shape_file_results.zip') as f:
@@ -723,8 +816,13 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 
 	# third_stage.download_button('Download file', binary_contents)  # Defaults to 'application/octet-stream'
 
-	with open('shape_file_results.zip', 'rb') as f:
-	   third_stage.download_button('DOWNLOAD SHAPE FILE RESULTS (.ZIP)', f, file_name='shape_file_results.zip')  # Defaults to 'application/octet-stream'
+	with open('shape_file_cls_results.zip', 'rb') as f:
+	   third_stage.download_button('DOWNLOAD CLS SHAPE FILE RESULTS (.ZIP)', f, file_name='shape_file_cls_results.zip')  # Defaults to 'application/octet-stream'
+
+
+	with open('shape_file_reg_results.zip', 'rb') as f:
+	   third_stage.download_button('DOWNLOAD REG SHAPE FILE RESULTS (.ZIP)', f, file_name='shape_file_reg_results.zip')  # Defaults to 'application/octet-stream'
+
 
 	# You can also grab the return value of the button,
 	# just like with any other button.
@@ -732,6 +830,8 @@ if sat_image and train_label_image_multiple and val_label_image_multiple:
 	# if third_stage.download_button(...):
 	#    third_stage.write('Thanks for downloading!')
 
-	third_stage.success('Your file is ready to download!')
+	OUTPUT_TEXT = 'Your file is ready to download! with total time spent: '+str( ConvertedSec )
+
+	third_stage.success(OUTPUT_TEXT)
 
 
